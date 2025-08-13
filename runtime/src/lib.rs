@@ -323,6 +323,8 @@ mod runtime {
 	// Template
 	#[runtime::pallet_index(50)]
 	pub type HoldPallet = pallet_parachain_hold_template;
+ 	#[runtime::pallet_index(51)]
+	pub type FreezePallet = pallet_freeze_template;
 }
 
 #[docify::export(register_validate_block)]

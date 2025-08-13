@@ -8742,6 +8742,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "pallet-freeze-template"
+version = "0.1.0"
+dependencies = [
+ "parity-scale-codec",
+ "polkadot-sdk 2503.0.1",
+ "polkadot-sdk-frame",
+ "primitives",
+ "scale-info",
+]
+
+[[package]]
 name = "pallet-glutton"
 version = "26.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -10016,6 +10027,7 @@ dependencies = [
  "docify",
  "hex-literal",
  "log",
+ "pallet-freeze-template",
  "pallet-parachain-hold-template",
  "parity-scale-codec",
  "polkadot-sdk 2503.0.1",

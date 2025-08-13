@@ -9,6 +9,7 @@ edition = "2021"
 members = [
     "node",
     "pallets/hold-template",
+    "pallets/freeze-template",
     "runtime",
 ]
 resolver = "2"
@@ -16,6 +17,7 @@ resolver = "2"
 [workspace.dependencies]
 parachain-template-runtime = { path = "./runtime", default-features = false }
 pallet-parachain-hold-template = { path = "./pallets/hold-template", default-features = false }
+pallet-freeze-template = { path = "./pallets/freeze-template", default-features = false }
 clap = { version = "4.5.13" }
 color-print = { version = "0.3.4" }
 docify = { version = "0.2.9" }

@@ -66,7 +66,7 @@ use super::{
 	RuntimeFreezeReason, RuntimeHoldReason, RuntimeOrigin, RuntimeTask, Session, SessionKeys,
 	System, WeightToFee, XcmpQueue, AVERAGE_ON_INITIALIZE_RATIO, EXISTENTIAL_DEPOSIT, HOURS,
 	MAXIMUM_BLOCK_WEIGHT, MICRO_UNIT, NORMAL_DISPATCH_RATIO, SLOT_DURATION, VERSION, UNIT,
-	deposit, AssetsHolder, Assets,
+	deposit, AssetsHolder, Assets, AssetsFreezer,
 };
 use xcm_config::{RelayLocation, XcmOriginToTransactDispatchOrigin};
 
@@ -326,6 +326,12 @@ impl pallet_parachain_hold_template::Config for Runtime {
 	type AssetsHolder = AssetsHolder;
 }
 
+impl pallet_freeze_template::Config for Runtime {
+	type WeightInfo = ();
+	type ForeignCurrency = Assets;
+	type AssetsFreezer = AssetsFreezer;
+}
+
 parameter_types! {
     pub const AssetDeposit: Balance = 10 * UNIT;
     pub const AssetAccountDeposit: Balance = deposit(1, 16);
@@ -350,7 +356,7 @@ impl pallet_assets::Config<pallet_assets::Instance1> for Runtime {
     type Currency = Balances;
     type Extra = ();
     type ForceOrigin = EnsureRoot<AccountId>;
-    type Freezer = ();
+    type Freezer = AssetsFreezer;
 	type Holder = AssetsHolder;
     type MetadataDepositBase = MetadataDepositBase;
     type MetadataDepositPerByte = MetadataDepositPerByte;

@@ -64,8 +64,7 @@ mod benchmarking;
 
 use frame::deps::frame_support::traits::{
 	tokens::fungibles,
-	fungibles::MutateFreeze,
-	tokens::Precision,
+	fungibles::{MutateFreeze, InspectFreeze},
 	Get,	
 };
 
@@ -98,7 +97,7 @@ pub mod pallet {
 			+ fungibles::Mutate<AccountIdOf<Self>, Balance = Balance>
 			+ fungibles::Inspect<AccountIdOf<Self>, Balance = Balance>;
 
-		type AssetsFreezer: fungibles::MutateFreeze<AccountIdOf<Self>, AssetId = u32, Balance = Balance, Id = TestId>
+ 		type AssetsFreezer: fungibles::MutateFreeze<AccountIdOf<Self>, AssetId = u32, Balance = Balance, Id = DummyFreezeReason>
 			+ fungibles::InspectFreeze<AccountIdOf<Self>, AssetId = u32>;
 	}
 
@@ -122,6 +121,8 @@ pub mod pallet {
 	pub enum Error<T> {
 		NotEnoughFundsToHold,
 		NotEnoughFundsToRelease,
+		Overflow,
+		NotEnoughTokenFrozen,
 	}
 
 	#[pallet::hooks]
@@ -136,61 +137,48 @@ pub mod pallet {
 
 		#[pallet::call_index(0)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn make_hold_other(origin: OriginFor<T>, amount: Balance) -> DispatchResult {
+		pub fn make_freeze_other(origin: OriginFor<T>, amount: Balance) -> DispatchResult {
 			let signer = ensure_signed(origin)?;
-			let frozen_balance = T::AssetsFreezer::balance_frozen(1, &DummyHoldReason::Other, &signer);
+ 			let frozen_balance = T::AssetsFreezer::balance_frozen(1, &DummyFreezeReason::Other, &signer);
 			let new_frozen_balance = frozen_balance.checked_add(amount).ok_or(Error::<T>::Overflow)?;
-			T::AssetsFreezer::set_freeze(1, &DummyHoldReason::Other, &signer, new_frozen_balance)?;
-
+			T::AssetsFreezer::set_freeze(1, &DummyFreezeReason::Other, &signer, new_frozen_balance)?;
 			Ok(())
 		}
 
-		/* #[pallet::call_index(1)]
+		#[pallet::call_index(1)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn make_hold_staking(origin: OriginFor<T>, amount: Balance) -> DispatchResult {
+		pub fn make_freeze_staking(origin: OriginFor<T>, amount: Balance) -> DispatchResult {
 			let signer = ensure_signed(origin)?;
 
-			// Try to hold the funds using AssetsHolder
-			T::AssetsHolder::hold(
-				1,
-				&DummyHoldReason::Staking,
-				&signer,
-				amount,				
-			).map_err(|_| Error::<T>::NotEnoughFundsToHold)?;
+			let frozen_balance = T::AssetsFreezer::balance_frozen(1, &DummyFreezeReason::Staking, &signer);
+			let new_frozen_balance = frozen_balance.checked_add(amount).ok_or(Error::<T>::Overflow)?;
+			T::AssetsFreezer::set_freeze(1, &DummyFreezeReason::Staking, &signer, new_frozen_balance)?;
 			Ok(())
 		}
 
 		#[pallet::call_index(2)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn release_hold_other(origin: OriginFor<T>, amount: Balance) -> DispatchResult {
+		pub fn release_freeze_other(origin: OriginFor<T>, amount: Balance) -> DispatchResult {
 			let signer = ensure_signed(origin)?;
 
-			// Try to hold the funds using AssetsHolder
-			T::AssetsHolder::release(
-				1,
-				&DummyHoldReason::Other,
-				&signer,
-				amount,
-				Precision::Exact,				
-			).map_err(|_| Error::<T>::NotEnoughFundsToRelease)?;
+			let frozen_balance = T::AssetsFreezer::balance_frozen(1, &DummyFreezeReason::Other, &signer);
+			ensure!(frozen_balance >= amount, Error::<T>::NotEnoughTokenFrozen);
+			let new_frozen_balance = frozen_balance.checked_sub(amount).ok_or(Error::<T>::Overflow)?;
+			T::AssetsFreezer::set_freeze(1, &DummyFreezeReason::Other, &signer, new_frozen_balance)?;
 			Ok(())
 		}
 
 		#[pallet::call_index(3)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn release_hold_staking(origin: OriginFor<T>, amount: Balance) -> DispatchResult {
+		pub fn release_freeze_staking(origin: OriginFor<T>, amount: Balance) -> DispatchResult {
 			let signer = ensure_signed(origin)?;
 
-			// Try to hold the funds using AssetsHolder
-			T::AssetsHolder::release(
-				1,
-				&DummyHoldReason::Staking,
-				&signer,
-				amount,
-				Precision::Exact,				
-			).map_err(|_| Error::<T>::NotEnoughFundsToRelease)?;
+			let frozen_balance = T::AssetsFreezer::balance_frozen(1, &DummyFreezeReason::Staking, &signer);
+			ensure!(frozen_balance >= amount, Error::<T>::NotEnoughTokenFrozen);
+			let new_frozen_balance = frozen_balance.checked_sub(amount).ok_or(Error::<T>::Overflow)?;
+			T::AssetsFreezer::set_freeze(1, &DummyFreezeReason::Staking, &signer, new_frozen_balance)?;
 			Ok(())
-		} */
+		}
 		
 	}
 }
