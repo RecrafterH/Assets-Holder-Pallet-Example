@@ -56,7 +56,7 @@ use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_runtime::Perbill;
 use sp_version::RuntimeVersion;
 use xcm::latest::prelude::BodyId;
-use primitives::DummyHoldReason;
+use primitives::{DummyHoldReason, DummyFreezeReason};
 
 // Local module imports
 use super::{
@@ -320,8 +320,8 @@ impl pallet_collator_selection::Config for Runtime {
 }
 
 /// Configure the pallet template in pallets/template.
-impl pallet_parachain_template::Config for Runtime {
-	type WeightInfo = pallet_parachain_template::weights::SubstrateWeight<Runtime>;
+impl pallet_parachain_hold_template::Config for Runtime {
+	type WeightInfo = pallet_parachain_hold_template::weights::SubstrateWeight<Runtime>;
 	type ForeignCurrency = Assets;
 	type AssetsHolder = AssetsHolder;
 }
@@ -363,5 +363,10 @@ impl pallet_assets::Config<pallet_assets::Instance1> for Runtime {
 
 impl pallet_assets_holder::Config<pallet_assets::Instance1> for Runtime {
 	type RuntimeHoldReason = DummyHoldReason;
+	type RuntimeEvent = RuntimeEvent;
+} 
+
+impl pallet_assets_freezer::Config<pallet_assets::Instance1> for Runtime {
+	type RuntimeFreezeReason = DummyFreezeReason;
 	type RuntimeEvent = RuntimeEvent;
 } 

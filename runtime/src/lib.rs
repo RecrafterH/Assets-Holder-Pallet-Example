@@ -291,6 +291,8 @@ mod runtime {
 	pub type Assets = pallet_assets::Pallet<Runtime, Instance1>;
 	#[runtime::pallet_index(13)]
 	pub type AssetsHolder = pallet_assets_holder::Pallet<Runtime, Instance1>;
+	#[runtime::pallet_index(14)]
+	pub type AssetsFreezer = pallet_assets_freezer::Pallet<Runtime, Instance1>;
 
 	// Governance
 	#[runtime::pallet_index(15)]
@@ -320,7 +322,7 @@ mod runtime {
 
 	// Template
 	#[runtime::pallet_index(50)]
-	pub type TemplatePallet = pallet_parachain_template;
+	pub type HoldPallet = pallet_parachain_hold_template;
 }
 
 #[docify::export(register_validate_block)]

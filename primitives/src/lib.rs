@@ -28,3 +28,28 @@ impl VariantCount for DummyHoldReason {
 	// Intentionally set below the actual count of variants, to allow testing for `can_freeze`
 	const VARIANT_COUNT: u32 = 3;
 }
+
+#[derive(
+	Decode,
+	DecodeWithMemTracking,
+	Encode,
+	MaxEncodedLen,
+	PartialEq,
+	Eq,
+	Ord,
+	PartialOrd,
+	TypeInfo,
+	Debug,
+	Clone,
+	Copy,
+)]
+pub enum DummyFreezeReason {
+	Governance,
+	Staking,
+	Other,
+}
+
+impl VariantCount for DummyFreezeReason {
+	// Intentionally set below the actual count of variants, to allow testing for `can_freeze`
+	const VARIANT_COUNT: u32 = 3;
+}

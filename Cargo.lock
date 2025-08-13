@@ -9155,7 +9155,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "pallet-parachain-template"
+name = "pallet-parachain-hold-template"
 version = "0.1.0"
 dependencies = [
  "parity-scale-codec",
@@ -10016,7 +10016,7 @@ dependencies = [
  "docify",
  "hex-literal",
  "log",
- "pallet-parachain-template",
+ "pallet-parachain-hold-template",
  "parity-scale-codec",
  "polkadot-sdk 2503.0.1",
  "primitives",
