@@ -322,6 +322,8 @@ impl pallet_collator_selection::Config for Runtime {
 /// Configure the pallet template in pallets/template.
 impl pallet_parachain_hold_template::Config for Runtime {
 	type WeightInfo = pallet_parachain_hold_template::weights::SubstrateWeight<Runtime>;
+    type NativeCurrency = Balances;
+	type RuntimeHoldReason = RuntimeHoldReason;
 	type ForeignCurrency = Assets;
 	type AssetsHolder = AssetsHolder;
 }

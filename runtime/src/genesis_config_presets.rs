@@ -38,7 +38,7 @@ fn testnet_genesis(
 			balances: endowed_accounts
 				.iter()
 				.cloned()
-				.map(|k| (k, 1u128 << 60))
+				.map(|k| (k, 1_000_000_000_000_000))
 				.collect::<Vec<_>>(),
 		},
 		parachain_info: ParachainInfoConfig { parachain_id: id },
@@ -62,7 +62,7 @@ fn testnet_genesis(
 		sudo: SudoConfig { key: Some(root) },
 		assets : AssetsConfig {
 			assets: vec![(1, Sr25519Keyring::Alice.to_account_id(), true, 1)], // Genesis assets: id, owner, is_sufficient, min_balance
-			metadata: vec![(1, "USD".as_bytes().to_vec(), "USD".as_bytes().to_vec(), 0)], // Genesis metadata: id, name, symbol, decimals
+			metadata: vec![(1, "USD".as_bytes().to_vec(), "USD".as_bytes().to_vec(), 6)], // Genesis metadata: id, name, symbol, decimals
 			accounts: Sr25519Keyring::iter()
 				.map(|a| (1, a.to_account_id(), 1000))
 				.collect::<Vec<_>>(),

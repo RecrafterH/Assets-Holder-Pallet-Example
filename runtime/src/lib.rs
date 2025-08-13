@@ -204,7 +204,7 @@ pub const MILLI_UNIT: Balance = 1_000_000_000;
 pub const MICRO_UNIT: Balance = 1_000_000;
 
 /// The existential deposit. Set to 1/10 of the Connected Relay Chain.
-pub const EXISTENTIAL_DEPOSIT: Balance = MILLI_UNIT;
+pub const EXISTENTIAL_DEPOSIT: Balance = 10 * UNIT;
 
 pub const fn deposit(items: u32, bytes: u32) -> Balance {
     items as Balance * 15 * MILLI_UNIT + (bytes as Balance) * 6 * MILLI_UNIT

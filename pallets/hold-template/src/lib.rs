@@ -63,8 +63,9 @@ pub mod weights;
 mod benchmarking;
 
 use frame::deps::frame_support::traits::{
+	fungible::MutateHold,
 	tokens::fungibles,
-	fungibles::MutateHold,
+	fungibles::MutateHold as FungiblesMutateHold,
 	tokens::Precision,
 	Get,	
 };
@@ -85,11 +86,30 @@ pub type AccountIdOf<T> = <T as frame_system::Config>::AccountId;
 pub mod pallet {
 	use super::*;
 
+	#[pallet::composite_enum]
+    pub enum HoldReason {
+        #[codec(index = 0)]
+        HoldReserve,
+    }
+
 	/// Configure the pallet by specifying the parameters and types on which it depends.
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
 		/// A type representing the weights required by the dispatchables of this pallet.
 		type WeightInfo: crate::weights::WeightInfo;
+
+		type NativeCurrency: fungible::Inspect<AccountIdOf<Self>>
+            + fungible::Mutate<AccountIdOf<Self>>
+            + fungible::InspectHold<AccountIdOf<Self>, Balance = Balance>
+            + fungible::BalancedHold<AccountIdOf<Self>, Balance = Balance>
+            + fungible::hold::Inspect<Self::AccountId>
+            + fungible::hold::Mutate<
+                Self::AccountId,
+                Reason = <Self as pallet::Config>::RuntimeHoldReason,
+            >;
+		
+		/// The overarching hold reason.
+        type RuntimeHoldReason: From<HoldReason>;
 
 		/// The currency used for funding projects in bids and contributions
 		type ForeignCurrency: fungibles::InspectEnumerable<AccountIdOf<Self>, Balance = Balance, AssetId = u32>
@@ -195,6 +215,32 @@ pub mod pallet {
 			).map_err(|_| Error::<T>::NotEnoughFundsToRelease)?;
 			Ok(())
 		}
-		
+
+		#[pallet::call_index(4)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		pub fn hold_native(origin: OriginFor<T>, amount: Balance) -> DispatchResult {
+			let signer = ensure_signed(origin)?;
+
+            T::NativeCurrency::hold(
+                &HoldReason::HoldReserve.into(),
+                &signer,
+                amount,
+            )?;
+			Ok(())
+		}
+
+		#[pallet::call_index(5)]
+		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
+		pub fn release_native(origin: OriginFor<T>, amount: Balance) -> DispatchResult {
+			let signer = ensure_signed(origin)?;
+
+            T::NativeCurrency::release(
+                &HoldReason::HoldReserve.into(),
+                &signer,
+                amount,
+                Precision::Exact,
+            )?;
+			Ok(())
+		}		
 	}
 }
