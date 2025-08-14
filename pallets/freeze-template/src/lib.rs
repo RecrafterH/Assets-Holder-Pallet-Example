@@ -64,7 +64,7 @@ mod benchmarking;
 
 use frame::deps::frame_support::traits::{
 	tokens::fungibles,
-	fungibles::{MutateFreeze, InspectFreeze},
+	fungibles::MutateFreeze,
 	Get,	
 };
 
@@ -97,8 +97,7 @@ pub mod pallet {
 			+ fungibles::Mutate<AccountIdOf<Self>, Balance = Balance>
 			+ fungibles::Inspect<AccountIdOf<Self>, Balance = Balance>;
 
- 		type AssetsFreezer: fungibles::MutateFreeze<AccountIdOf<Self>, AssetId = u32, Balance = Balance, Id = DummyFreezeReason>
-			+ fungibles::InspectFreeze<AccountIdOf<Self>, AssetId = u32>;
+ 		type AssetsFreezer: fungibles::MutateFreeze<AccountIdOf<Self>, AssetId = u32, Balance = Balance, Id = DummyFreezeReason>;
 	}
 
 	#[pallet::pallet]
@@ -139,32 +138,23 @@ pub mod pallet {
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn make_freeze_other(origin: OriginFor<T>, amount: Balance) -> DispatchResult {
 			let signer = ensure_signed(origin)?;
- 			let frozen_balance = T::AssetsFreezer::balance_frozen(1, &DummyFreezeReason::Other, &signer);
-			let new_frozen_balance = frozen_balance.checked_add(amount).ok_or(Error::<T>::Overflow)?;
-			T::AssetsFreezer::set_freeze(1, &DummyFreezeReason::Other, &signer, new_frozen_balance)?;
+			T::AssetsFreezer::increase_frozen(1, &DummyFreezeReason::Other, &signer, amount)?;
 			Ok(())
 		}
 
 		#[pallet::call_index(1)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn make_freeze_staking(origin: OriginFor<T>, amount: Balance) -> DispatchResult {
+		pub fn release_freeze_other(origin: OriginFor<T>, amount: Balance) -> DispatchResult {
 			let signer = ensure_signed(origin)?;
-
-			let frozen_balance = T::AssetsFreezer::balance_frozen(1, &DummyFreezeReason::Staking, &signer);
-			let new_frozen_balance = frozen_balance.checked_add(amount).ok_or(Error::<T>::Overflow)?;
-			T::AssetsFreezer::set_freeze(1, &DummyFreezeReason::Staking, &signer, new_frozen_balance)?;
+			T::AssetsFreezer::decrease_frozen(1, &DummyFreezeReason::Other, &signer, amount)?;
 			Ok(())
 		}
 
 		#[pallet::call_index(2)]
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
-		pub fn release_freeze_other(origin: OriginFor<T>, amount: Balance) -> DispatchResult {
+		pub fn make_freeze_staking(origin: OriginFor<T>, amount: Balance) -> DispatchResult {
 			let signer = ensure_signed(origin)?;
-
-			let frozen_balance = T::AssetsFreezer::balance_frozen(1, &DummyFreezeReason::Other, &signer);
-			ensure!(frozen_balance >= amount, Error::<T>::NotEnoughTokenFrozen);
-			let new_frozen_balance = frozen_balance.checked_sub(amount).ok_or(Error::<T>::Overflow)?;
-			T::AssetsFreezer::set_freeze(1, &DummyFreezeReason::Other, &signer, new_frozen_balance)?;
+			T::AssetsFreezer::increase_frozen(1, &DummyFreezeReason::Staking, &signer, amount)?;
 			Ok(())
 		}
 
@@ -172,11 +162,7 @@ pub mod pallet {
 		#[pallet::weight(Weight::from_parts(10_000, 0) + T::DbWeight::get().writes(1))]
 		pub fn release_freeze_staking(origin: OriginFor<T>, amount: Balance) -> DispatchResult {
 			let signer = ensure_signed(origin)?;
-
-			let frozen_balance = T::AssetsFreezer::balance_frozen(1, &DummyFreezeReason::Staking, &signer);
-			ensure!(frozen_balance >= amount, Error::<T>::NotEnoughTokenFrozen);
-			let new_frozen_balance = frozen_balance.checked_sub(amount).ok_or(Error::<T>::Overflow)?;
-			T::AssetsFreezer::set_freeze(1, &DummyFreezeReason::Staking, &signer, new_frozen_balance)?;
+			T::AssetsFreezer::decrease_frozen(1, &DummyFreezeReason::Staking, &signer, amount)?;
 			Ok(())
 		}
 		

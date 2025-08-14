@@ -11,7 +11,7 @@ use frame::{
 pub type Balance = u128;
 type Block = frame::deps::frame_system::mocking::MockBlock<Test>;
 
-use primitives::DummyHoldReason;
+use primitives::DummyFreezeReason;
 
 use pallet_assets::Instance1;
 
@@ -42,7 +42,7 @@ mod test_runtime {
 	#[runtime::pallet_index(3)]
 	pub type Assets = pallet_assets::Pallet<Runtime, Instance1>;
 	#[runtime::pallet_index(4)]
-	pub type AssetsHolder = pallet_assets_holder::Pallet<Runtime, Instance1>;
+	pub type AssetsFreezer = pallet_assets_freezer::Pallet<Runtime, Instance1>;
 }
 
 #[derive_impl(frame_system::config_preludes::ParaChainDefaultConfig as frame_system::DefaultConfig)]
@@ -80,7 +80,7 @@ impl pallet_balances::Config for Test {
 impl crate::Config for Test {
 	type WeightInfo = ();
 	type ForeignCurrency = Assets;
-	type AssetsHolder = AssetsHolder;
+	type AssetsFreezer = AssetsFreezer;
 }
 
 parameter_types! {
@@ -104,8 +104,8 @@ impl pallet_assets::Config<pallet_assets::Instance1> for Test {
     type Currency = Balances;
     type Extra = ();
     type ForceOrigin = EnsureRoot<u64>;
-    type Freezer = ();
-	type Holder = AssetsHolder;
+    type Freezer = AssetsFreezer;
+	type Holder = ();
     type MetadataDepositBase = ConstU128<1>;
     type MetadataDepositPerByte = ConstU128<1>;
     type RemoveItemsLimit = RemoveItemsLimit;
@@ -115,8 +115,8 @@ impl pallet_assets::Config<pallet_assets::Instance1> for Test {
     type WeightInfo = ();
 }
 
-impl pallet_assets_holder::Config<pallet_assets::Instance1> for Test {
-	type RuntimeHoldReason = DummyHoldReason;
+impl pallet_assets_freezer::Config<pallet_assets::Instance1> for Test {
+	type RuntimeFreezeReason = DummyFreezeReason;
 	type RuntimeEvent = RuntimeEvent;
 } 
 
